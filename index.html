@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wat Claude allemaal doet</title>
+<meta name="description" content="Een overzicht van alles wat Claude voor u kan doen: code, teksten, analyse, automatisering en agents.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0d12;
+    --bg-soft: #12151d;
+    --card: #161a24;
+    --card-hover: #1c2130;
+    --border: #262c3b;
+    --text: #eef1f6;
+    --muted: #9aa3b5;
+    --accent: #e8833a;
+    --accent-soft: rgba(232, 131, 58, 0.12);
+    --blue: #6ea8fe;
+    --green: #5dd39e;
+    --purple: #b197fc;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Work Sans', system-ui, sans-serif;
+    line-height: 1.65;
+    font-size: 16px;
+  }
+  h1, h2, h3 { font-family: 'Outfit', system-ui, sans-serif; line-height: 1.15; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+  /* Nav */
+  nav {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(11, 13, 18, 0.85);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-inner {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 24px; max-width: 1100px; margin: 0 auto;
+  }
+  .logo { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 1.15rem; color: var(--text); text-decoration: none; }
+  .logo span { color: var(--accent); }
+  .nav-links { display: flex; gap: 28px; }
+  .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s; }
+  .nav-links a:hover, .nav-links a:focus-visible { color: var(--text); }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+
+  /* Hero */
+  header { padding: 110px 0 90px; text-align: center; position: relative; overflow: hidden; }
+  header::before {
+    content: ""; position: absolute; top: 0; right: 0; bottom: 0; left: 0;
+    background: radial-gradient(ellipse 60% 50% at 50% -10%, rgba(232,131,58,0.14), transparent);
+    pointer-events: none;
+  }
+  .badge {
+    display: inline-block; padding: 6px 16px; border-radius: 999px;
+    background: var(--accent-soft); color: var(--accent);
+    font-size: 0.85rem; font-weight: 500; margin-bottom: 24px;
+    border: 1px solid rgba(232,131,58,0.25);
+  }
+  h1 { font-size: clamp(2.4rem, 6vw, 4rem); font-weight: 700; margin-bottom: 20px; }
+  h1 em { font-style: normal; color: var(--accent); }
+  .sub { color: var(--muted); font-size: 1.15rem; max-width: 620px; margin: 0 auto 36px; }
+  .cta {
+    display: inline-block; background: var(--accent); color: #14100b;
+    padding: 14px 32px; border-radius: 10px; font-weight: 600;
+    text-decoration: none; font-size: 1rem; transition: background 0.2s;
+    cursor: pointer;
+  }
+  .cta:hover { background: #f29550; }
+
+  /* Terminal demo */
+  .terminal {
+    max-width: 640px; margin: 60px auto 0; text-align: left;
+    background: var(--bg-soft); border: 1px solid var(--border); border-radius: 14px;
+    overflow: hidden; box-shadow: 0 24px 60px rgba(0,0,0,0.45);
+  }
+  .term-bar { display: flex; gap: 7px; padding: 13px 16px; border-bottom: 1px solid var(--border); }
+  .dot { width: 11px; height: 11px; border-radius: 50%; background: #333a4c; }
+  .dot:first-child { background: #e8833a55; }
+  .term-body { padding: 20px 22px; font-family: 'Consolas', 'Courier New', monospace; font-size: 0.9rem; color: var(--muted); min-height: 96px; }
+  .term-body .prompt { color: var(--green); }
+  #typed { color: var(--text); }
+  .cursor { display: inline-block; width: 8px; height: 17px; background: var(--accent); vertical-align: text-bottom; animation: blink 1s step-end infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) {
+    .cursor { animation: none; }
+    * { transition: none !important; }
+  }
+
+  /* Sections */
+  section { padding: 90px 0; }
+  .section-head { text-align: center; margin-bottom: 56px; }
+  .section-head h2 { font-size: clamp(1.8rem, 4vw, 2.5rem); margin-bottom: 14px; }
+  .section-head p { color: var(--muted); max-width: 560px; margin: 0 auto; }
+
+  /* Bento grid */
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+    padding: 30px 28px; transition: background 0.2s, border-color 0.2s, transform 0.25s;
+  }
+  .card:hover { background: var(--card-hover); border-color: #333c52; transform: translateY(-3px); }
+  .card.wide { grid-column: span 2; }
+  .icon-wrap {
+    width: 46px; height: 46px; border-radius: 12px; display: flex;
+    align-items: center; justify-content: center; margin-bottom: 20px;
+  }
+  .icon-wrap svg { width: 24px; height: 24px; }
+  .card h3 { font-size: 1.2rem; margin-bottom: 10px; }
+  .card p { color: var(--muted); font-size: 0.95rem; }
+  .tint-orange { background: rgba(232,131,58,0.12); color: var(--accent); }
+  .tint-blue { background: rgba(110,168,254,0.12); color: var(--blue); }
+  .tint-green { background: rgba(93,211,158,0.12); color: var(--green); }
+  .tint-purple { background: rgba(177,151,252,0.12); color: var(--purple); }
+
+  /* Stats */
+  .stats { background: var(--bg-soft); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; text-align: center; }
+  .stat-num { font-family: 'Outfit', sans-serif; font-size: 2.6rem; font-weight: 700; color: var(--accent); }
+  .stat-label { color: var(--muted); font-size: 0.92rem; margin-top: 4px; }
+
+  /* Workflow */
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; counter-reset: step; }
+  .step { position: relative; background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 34px 28px 30px; }
+  .step::before {
+    counter-increment: step; content: counter(step);
+    position: absolute; top: -18px; left: 26px;
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--accent); color: #14100b; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Outfit', sans-serif;
+  }
+  .step h3 { font-size: 1.1rem; margin-bottom: 8px; }
+  .step p { color: var(--muted); font-size: 0.95rem; }
+
+  /* Footer */
+  footer { border-top: 1px solid var(--border); padding: 40px 0; text-align: center; color: var(--muted); font-size: 0.9rem; }
+  footer a { color: var(--accent); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 900px) {
+    .grid, .steps { grid-template-columns: 1fr 1fr; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .card.wide { grid-column: span 2; }
+  }
+  @media (max-width: 600px) {
+    .grid, .steps, .stats-grid { grid-template-columns: 1fr; }
+    .card.wide { grid-column: span 1; }
+    .nav-links { display: none; }
+    section { padding: 64px 0; }
+    header { padding: 80px 0 60px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="logo">wat claude <span>doet</span></a>
+    <div class="nav-links">
+      <a href="#kan">Wat het kan</a>
+      <a href="#werkwijze">Werkwijze</a>
+      <a href="#start">Beginnen</a>
+    </div>
+  </div>
+</nav>
+
+<header>
+  <div class="container">
+    <span class="badge">AI-assistent van Anthropic</span>
+    <h1>Eén assistent,<br><em>duizend-en-één taken</em></h1>
+    <p class="sub">Claude schrijft code, teksten en analyses, bouwt websites, automatiseert werk en denkt mee. Dit is wat dat concreet betekent.</p>
+    <a href="#kan" class="cta">Toon mij alles</a>
+
+    <div class="terminal" aria-hidden="true">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+      <div class="term-body">
+        <span class="prompt">davy&gt;</span> <span id="typed"></span><span class="cursor"></span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section id="kan">
+  <div class="container">
+    <div class="section-head">
+      <h2>Wat Claude allemaal doet</h2>
+      <p>Van een snelle vraag tot een volledig project. Dit zijn de dingen waar Claude dagelijks voor gebruikt wordt.</p>
+    </div>
+    <div class="grid">
+      <div class="card wide">
+        <div class="icon-wrap tint-orange">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        </div>
+        <h3>Code schrijven &amp; debuggen</h3>
+        <p>Volledige websites, apps en scripts bouwen in eender welke taal. Fouten opsporen, code uitleggen, refactoren en testen schrijven. Van een klein fixje tot een compleet project van nul.</p>
+      </div>
+      <div class="card">
+        <div class="icon-wrap tint-blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        </div>
+        <h3>Teksten schrijven</h3>
+        <p>Blogposts, socialemediacontent, e-mails, offertes en scripts. In uw eigen stijl en taal — ook in het Vlaams.</p>
+      </div>
+      <div class="card">
+        <div class="icon-wrap tint-green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        </div>
+        <h3>Analyse &amp; data</h3>
+        <p>Spreadsheets doorpluizen, rapporten samenvatten, cijfers interpreteren en grafieken maken die iets zeggen.</p>
+      </div>
+      <div class="card">
+        <div class="icon-wrap tint-purple">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </div>
+        <h3>Automatisering</h3>
+        <p>Repetitief werk wegwerken: workflows in n8n, scripts die bestanden verwerken, taken die vanzelf lopen.</p>
+      </div>
+      <div class="card wide">
+        <div class="icon-wrap tint-orange">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></svg>
+        </div>
+        <h3>Agents &amp; tools</h3>
+        <p>Claude werkt niet alleen in een chatvenster. Als agent gebruikt het uw terminal, browser en bestanden: het zoekt op het web, leest documenten, voert commando's uit, deployt sites en controleert nadien of alles echt werkt.</p>
+      </div>
+      <div class="card">
+        <div class="icon-wrap tint-blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </div>
+        <h3>Documenten</h3>
+        <p>PDF's, Word, Excel en PowerPoint lezen én maken. Samenvatten, vertalen, herstructureren of van nul opstellen.</p>
+      </div>
+      <div class="card">
+        <div class="icon-wrap tint-green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        </div>
+        <h3>Vertalen &amp; talen</h3>
+        <p>Vlot vertalen tussen tientallen talen, met oog voor toon en context in plaats van woord-voor-woord.</p>
+      </div>
+      <div class="card">
+        <div class="icon-wrap tint-purple">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
+        <h3>Onderzoek</h3>
+        <p>Informatie opzoeken, bronnen vergelijken en een helder antwoord geven in plaats van tien blauwe links.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="stats">
+  <div class="container">
+    <div class="stats-grid">
+      <div><div class="stat-num" data-target="200">0</div><div class="stat-label">K tokens context</div></div>
+      <div><div class="stat-num" data-target="100">0</div><div class="stat-label">+ talen</div></div>
+      <div><div class="stat-num" data-target="24">0</div><div class="stat-label">/7 beschikbaar</div></div>
+      <div><div class="stat-num" data-target="1">0</div><div class="stat-label">assistent voor alles</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="werkwijze">
+  <div class="container">
+    <div class="section-head">
+      <h2>Hoe dat werkt</h2>
+      <p>Geen handleidingen, geen setup. Gewoon zeggen wat er moet gebeuren.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <h3>Zeg wat u wilt</h3>
+        <p>In gewone mensentaal. "Maak een website", "leg deze foutmelding uit" of "schrijf dat mailtje vriendelijker".</p>
+      </div>
+      <div class="step">
+        <h3>Claude gaat aan de slag</h3>
+        <p>Het plant, bouwt, schrijft of zoekt op — en stelt tussendoor vragen als iets onduidelijk is.</p>
+      </div>
+      <div class="step">
+        <h3>U krijgt het resultaat</h3>
+        <p>Werkende code, een afgewerkte tekst of een helder antwoord. Niet goed? Eén zin feedback en het wordt aangepast.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="start" style="text-align: center; padding-bottom: 110px;">
+  <div class="container">
+    <h2 style="font-size: clamp(1.8rem, 4vw, 2.5rem); margin-bottom: 16px;">Zelf proberen?</h2>
+    <p style="color: var(--muted); max-width: 480px; margin: 0 auto 32px;">Claude is beschikbaar via claude.ai, als app en als Claude Code in de terminal.</p>
+    <a href="https://claude.ai" class="cta" target="_blank" rel="noopener">Ga naar claude.ai</a>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>Een demoproject van <a href="https://timmersdesign.be" target="_blank" rel="noopener">Timmers Design</a> &middot; gebouwd met Claude Code</p>
+  </div>
+</footer>
+
+<script>
+  // Typemachine in de hero-terminal
+  const lines = [
+    "maak een website voor mijn zaak",
+    "leg uit waarom deze code crasht",
+    "schrijf een post in het Vlaams",
+    "automatiseer mijn facturatie",
+    "vat dit PDF-rapport samen"
+  ];
+  const typedEl = document.getElementById("typed");
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduceMotion) {
+    typedEl.textContent = lines[0];
+  } else {
+    let li = 0, ci = 0, deleting = false;
+    function tick() {
+      const line = lines[li];
+      if (!deleting) {
+        typedEl.textContent = line.slice(0, ++ci);
+        if (ci === line.length) { deleting = true; return setTimeout(tick, 1800); }
+        setTimeout(tick, 55);
+      } else {
+        typedEl.textContent = line.slice(0, --ci);
+        if (ci === 0) { deleting = false; li = (li + 1) % lines.length; return setTimeout(tick, 400); }
+        setTimeout(tick, 28);
+      }
+    }
+    tick();
+  }
+
+  // Tellers in de statistiekbalk
+  const nums = document.querySelectorAll(".stat-num");
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      const el = entry.target;
+      observer.unobserve(el);
+      const target = +el.dataset.target;
+      if (reduceMotion) { el.textContent = target; return; }
+      const dur = 1200, start = performance.now();
+      function step(now) {
+        const p = Math.min((now - start) / dur, 1);
+        el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3)));
+        if (p < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    });
+  }, { threshold: 0.4 });
+  nums.forEach((n) => observer.observe(n));
+</script>
+
+</body>
+</html>
